@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { signIn } from "@/lib/auth/auth-client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -29,6 +30,22 @@ export default function SignIn() {
 
         setError("");
         setLoading(true);
+
+        try {
+            const result = await signIn.email({
+                email, password
+            })
+
+            if (result.error) {
+                setError(result.error.message ?? "Failed to sing in")
+            } else {
+                router.push("/dashboard")
+            }
+        } catch (err) {
+            setError("An unexpected error occured")
+        } finally {
+            setLoading(false)
+        }
 
 
     }
