@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signUp } from "@/lib/auth/auth-client";
 
 export default function SignUp() {
     const [name, setName] = useState("");
@@ -30,6 +31,22 @@ export default function SignUp() {
 
         setError("");
         setLoading(true);
+
+        try {
+            const result = await signUp.email({
+                name, email, password
+            })
+
+            if (result.error) {
+                setError(result.error.message ?? "Failed to sing up")
+            } else {
+                router.push("/dashboard")
+            }
+        } catch (err) {
+            setError("An unexpected error occured")
+        } finally {
+            setLoading(false)
+        }
 
 
     }
