@@ -3,24 +3,17 @@
 import { Briefcase } from "lucide-react";
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { useSession, signOut } from "@/lib/auth/auth-client";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "./ui/dropdown-menu";
+import { useSession } from "@/lib/auth/auth-client";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { useRouter } from "next/navigation";
+import SignOutButton from "./sign-out-btn";
 
 export default function Navbar() {
     const { data: sessionData, isPending } = useSession();
     const router = useRouter();
 
-    const handleSignOut = async () => {
-        await signOut({
-            fetchOptions: {
-                onSuccess: () => {
-                    router.push("/sign-in");
-                }
-            }
-        });
-    };
+
 
     const session = sessionData;
 
@@ -59,10 +52,9 @@ export default function Navbar() {
                                             </p>
                                         </div>
                                     </DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={handleSignOut} className="text-red-600 cursor-pointer">
-                                        Log out
-                                    </DropdownMenuItem>
+
+                                    <SignOutButton />
+
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </>
