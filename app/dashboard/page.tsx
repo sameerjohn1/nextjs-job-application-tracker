@@ -1,3 +1,4 @@
+
 import { getSession } from "@/lib/auth/auth";
 import connectDB from "@/lib/db";
 import { Board } from "@/lib/models";
@@ -5,8 +6,9 @@ import { redirect } from "next/navigation";
 import KanbanBoard from "@/components/kanban-board";
 import { Suspense } from "react";
 
-async function getBoard(userId: string) {
 
+async function getBoard(userId: string) {
+    "use cache"
     await connectDB();
 
     const boardDoc = await Board.findOne({
