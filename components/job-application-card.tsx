@@ -4,6 +4,7 @@ import { Edit2, ExternalLink, MoreVertical, Trash2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button, buttonVariants } from "./ui/button";
 import { cn } from "@/lib/utils";
+import { updateJobApplication } from "@/lib/actions/job-applications";
 
 interface JobApplicationCardProps {
     job: JobApplication;
@@ -11,6 +12,18 @@ interface JobApplicationCardProps {
 }
 
 export default function JobApplicationCard({ job, columns }: JobApplicationCardProps) {
+
+    async function handleMove(newColumnId: string) {
+        try {
+            const result = await updateJobApplication(job._id, {
+                columnId: newColumnId
+            })
+        } catch (error) {
+            console.log("Failed to move job application", error);
+
+        }
+    }
+
     return <>
         <Card>
             <CardContent className="p-4">
@@ -67,7 +80,9 @@ export default function JobApplicationCard({ job, columns }: JobApplicationCardP
                                 {columns.length > 1 && (
                                     <>
                                         {columns.filter((c) => c._id !== job.columnId).map((column, key) => (
-                                            <DropdownMenuItem key={key} >
+                                            <DropdownMenuItem key={key}
+                                                onClick={() => handleMove(column._id)}
+                                            >
                                                 Move to {column.name}
                                             </DropdownMenuItem>
                                         ))}
