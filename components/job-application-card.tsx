@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import { toast } from "sonner";
 
 interface JobApplicationCardProps {
     job: JobApplication;
@@ -57,10 +58,14 @@ export default function JobApplicationCard({ job, columns }: JobApplicationCardP
             })
 
             if (!result.error) {
+                toast.success("Job application updated successfully!");
                 setIsEditing(false)
+            } else {
+                toast.error(`Failed to update job application: ${result.error}`);
             }
         } catch (error) {
-            console.log("Failed to move job application", error);
+            toast.error("An unexpected error occurred while updating.");
+            console.log("Failed to update job application", error);
 
         }
     }
@@ -70,7 +75,13 @@ export default function JobApplicationCard({ job, columns }: JobApplicationCardP
             const result = await updateJobApplication(job._id, {
                 columnId: newColumnId
             })
+            if (!result.error) {
+                toast.success("Job application moved successfully!");
+            } else {
+                toast.error(`Failed to move job application: ${result.error}`);
+            }
         } catch (error) {
+            toast.error("An unexpected error occurred while moving.");
             console.log("Failed to move job application", error);
 
         }
@@ -80,10 +91,14 @@ export default function JobApplicationCard({ job, columns }: JobApplicationCardP
         if (confirm("Are you sure you want to delete this job application?")) {
             try {
                 const result = await deleteJobApplication(job._id)
-                if (result.error) {
+                if (!result.error) {
+                    toast.success("Job application deleted successfully!");
+                } else {
+                    toast.error(`Failed to delete job application: ${result.error}`);
                     console.log("Failed to delete job application", result.error);
                 }
             } catch (error) {
+                toast.error("An unexpected error occurred while deleting.");
                 console.log("Failed to delete job application", error);
             }
         }
