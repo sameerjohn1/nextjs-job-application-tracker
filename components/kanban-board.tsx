@@ -62,7 +62,7 @@ function DroppableColumn({ column, config, boardId, sortedColumns }:
         }
     })
 
-    const sortedJobs = column.jobApplications?.sort((a, b) => a.order - b.order) || []
+    const sortedJobs = [...(column.jobApplications || [])].sort((a, b) => a.order - b.order)
 
     return <Card className="min-w-[300px] flex shrink-0 shadow-md p-0" >
         <CardHeader className={`${config.color} text-white rounded-t-lg pb-3 pt-3`} >
@@ -144,7 +144,7 @@ export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
     const [activeId, setActiveId] = useState<string | null>(null)
     const { columns, moveJob } = useBoard(board);
 
-    const sortedColumns = columns?.sort((a, b) => a.order - b.order) || []
+    const sortedColumns = [...columns].sort((a, b) => a.order - b.order)
 
     const sensors = useSensors(useSensor(PointerSensor, {
         activationConstraint: {
@@ -164,14 +164,14 @@ export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
         if (!over || !board._id) return;
 
         const activeId = active.id as string;
-        const overId = active.id as string;
+        const overId = over.id as string;
 
         let draggedJob: JobApplication | null = null;
         let sourceColumn: Column | null = null;
         let sourceIndex = -1;
 
         for (const column of sortedColumns) {
-            const jobs = column.jobApplications.sort((a, b) => a.order - b.order) || [];
+            const jobs = [...(column.jobApplications || [])].sort((a, b) => a.order - b.order);
             const jobIndex = jobs.findIndex((job) => job._id === activeId);
             if (jobIndex !== -1) {
                 draggedJob = jobs[jobIndex];
@@ -205,13 +205,13 @@ export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
 
             if (!targetColumnObj) return;
 
-            const allJobsInTargetOriginal = targetColumnObj.jobApplications.sort((a, b) => a.order - b.order) || []
+            const allJobsInTargetOriginal = [...(targetColumnObj.jobApplications || [])].sort((a, b) => a.order - b.order)
 
             const allJobsInTargetFiltered = allJobsInTargetOriginal.filter((j) => j._id !== activeId) || []
 
             const targetIndexInOriginal = allJobsInTargetOriginal.findIndex((j) => j._id === overId)
 
-            const targetIndexInFiltered = allJobsInTargetOriginal.findIndex((j) => j._id === overId)
+            const targetIndexInFiltered = allJobsInTargetFiltered.findIndex((j) => j._id === overId)
 
             if (targetIndexInFiltered !== -1) {
                 if (sourceColumn._id === targetColumnId) {

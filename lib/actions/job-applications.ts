@@ -116,6 +116,8 @@ export async function updateJobApplication(
     return { error: "Unauthorized" };
   }
 
+  await connectDB();
+
   const jobApplication = await JobApplication.findById(id);
 
   if (!jobApplication) {
