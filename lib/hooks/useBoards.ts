@@ -19,7 +19,8 @@ export function useBoard(initialBoard?:Board | null){
         newColumnId:string,
         newOrder:number
     ){
-
+        console.log(jobApplicationId,newColumnId,newOrder);
+        
     }
 
 
