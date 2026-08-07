@@ -4,7 +4,7 @@
 
 import { useState } from "react";
 import { Board, Column, JobApplication } from "@/lib/models/models.types";
-import { Award, Calendar, CheckCircle2, Mic, MoreVertical, Trash2, XCircle } from "lucide-react";
+import { Award, Calendar, CheckCircle2, GripVertical, Mic, MoreVertical, Trash2, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { buttonVariants } from "./ui/button";
@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import CreateJobApplicationDialog from "./create-job-dialog";
 import JobApplicationCard from "./job-application-card";
 import { useBoard } from "@/lib/hooks/useBoards";
-import { closestCorners, DndContext, DragEndEvent, DragStartEvent, PointerSensor, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
+import { closestCorners, DndContext, DragCancelEvent, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities"
 
@@ -132,12 +132,36 @@ function SortableJobCard({ job, columns }: { job: JobApplication; columns: Colum
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        opacity: isDragging ? 0.5 : 1
+        opacity: isDragging ? 0.25 : 1
     }
 
     return <div ref={setNodeRef} style={style} >
-        <JobApplicationCard job={job} columns={columns} dragHandleProps={{ ...attributes, ...listeners }} />
+        <JobApplicationCard
+            job={job}
+            columns={columns}
+            dragHandleProps={{
+                ...attributes,
+                ...listeners,
+                className: "cursor-grab touch-none select-none active:cursor-grabbing",
+            }}
+        />
     </div>
+}
+
+function DragPreview({ job }: { job: JobApplication }) {
+    return (
+        <Card className="w-[280px] cursor-grabbing border-primary/40 shadow-xl ring-2 ring-primary/20">
+            <CardContent className="p-4">
+                <div className="flex items-start gap-2">
+                    <GripVertical className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0">
+                        <h3 className="font-semibold text-sm">{job.position}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">{job.company}</p>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    )
 }
 
 export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
@@ -145,6 +169,9 @@ export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
     const { columns, moveJob } = useBoard(board);
 
     const sortedColumns = [...columns].sort((a, b) => a.order - b.order)
+    const activeJob = activeId
+        ? columns.flatMap((column) => column.jobApplications || []).find((job) => job._id === activeId)
+        : null
 
     const sensors = useSensors(useSensor(PointerSensor, {
         activationConstraint: {
@@ -154,6 +181,10 @@ export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
 
     async function handleDragStart(event: DragStartEvent) {
         setActiveId(event.active.id as string)
+    }
+
+    function handleDragCancel(_event: DragCancelEvent) {
+        setActiveId(null)
     }
 
     async function handleDragEnd(event: DragEndEvent) {
@@ -242,6 +273,7 @@ export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
         sensors={sensors}
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}
+        onDragCancel={handleDragCancel}
         onDragEnd={handleDragEnd} >
         <div className="space-y-4" >
             <div className="flex gap-4 overflow-x-auto pb-4" >
@@ -261,6 +293,16 @@ export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
                 })}
             </div>
         </div>
+        <DragOverlay
+            adjustScale={false}
+            dropAnimation={{
+                duration: 180,
+                easing: "cubic-bezier(0.2, 0.7, 0.2, 1)",
+            }}
+            className="pointer-events-none"
+        >
+            {activeJob ? <DragPreview job={activeJob} /> : null}
+        </DragOverlay>
     </DndContext>
 
 }
